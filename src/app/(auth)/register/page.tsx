@@ -27,7 +27,7 @@ export default function SignupPage() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setForm({ ...form, [name]: value });
+        setForm((prev) => ({ ...prev, [name]: value }));
 
         if (name === "password") {
             let score = 0;
@@ -45,7 +45,9 @@ export default function SignupPage() {
         setError("");
         setLoading(true);
 
+        // Validation
         if (form.password !== form.confirmPassword) {
+            setLoading(false);
             return setError("Passwords do not match");
         }
 
@@ -53,16 +55,24 @@ export default function SignupPage() {
         const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!nameRegex.test(form.name)) return setError("Invalid name");
-        if (!usernameRegex.test(form.username))
+        if (!nameRegex.test(form.name)) {
+            setLoading(false);
+            return setError("Invalid name");
+        }
+        if (!usernameRegex.test(form.username)) {
+            setLoading(false);
             return setError("Invalid username");
-        if (!emailRegex.test(form.email)) return setError("Invalid email");
-
+        }
+        if (!emailRegex.test(form.email)) {
+            setLoading(false);
+            return setError("Invalid email");
+        }
         if (
             form.password.length < 8 ||
             !/[0-9]/.test(form.password) ||
             !/[@\-_=!$%&*#^+]/.test(form.password)
         ) {
+            setLoading(false);
             return setError(
                 "Password must be at least 8 characters and include a number and a special character."
             );
@@ -71,12 +81,21 @@ export default function SignupPage() {
         const encodedEmail = encodeEmail(form.email);
 
         try {
+            // Check for username existence
             const usernameDoc = await getDoc(doc(db, "users", form.username));
-            if (usernameDoc.exists()) return setError("Username already taken");
+            if (usernameDoc.exists()) {
+                setLoading(false);
+                return setError("Username already taken");
+            }
 
+            // Check for email existence
             const emailDoc = await getDoc(doc(db, "emails", encodedEmail));
-            if (emailDoc.exists()) return setError("Email already in use");
+            if (emailDoc.exists()) {
+                setLoading(false);
+                return setError("Email already in use");
+            }
 
+            // Create user in Firebase Auth
             const userCredential = await createUserWithEmailAndPassword(
                 auth,
                 form.email,
@@ -87,22 +106,24 @@ export default function SignupPage() {
                 displayName: form.name,
             });
 
+            // Store user info in Firestore
             await setDoc(doc(db, "users", form.username), {
                 uid: userCredential.user.uid,
                 name: form.name,
                 email: form.email,
             });
 
+            // Store email mapping in Firestore
             await setDoc(doc(db, "emails", encodedEmail), {
                 uid: userCredential.user.uid,
             });
 
             router.push("/dashboard");
         } catch (err: unknown) {
+            console.error(err);
+
             if (err instanceof Error) {
                 const message = err.message;
-                console.log(message);
-
                 if (message.includes("auth/email-already-in-use")) {
                     setError("This email is already in use. Try logging in.");
                 } else if (message.includes("auth/invalid-email")) {
@@ -113,11 +134,16 @@ export default function SignupPage() {
                     setError("Network error. Check your connection.");
                 } else if (message.includes("auth/operation-not-allowed")) {
                     setError("Sign up is disabled. Try again later.");
+                } else if (message.includes("permission-denied")) {
+                    setError("Permission denied. Please contact support.");
                 } else {
                     setError("Something went wrong. Please try again.");
                 }
+            } else {
+                setError("Something went wrong. Please try again.");
             }
         }
+        setLoading(false);
     };
 
     return (
@@ -135,6 +161,7 @@ export default function SignupPage() {
                 <input
                     name="name"
                     placeholder="Name"
+                    value={form.name}
                     onChange={handleChange}
                     className="w-full mb-4 px-4 py-3 rounded border dark:bg-gray-900 dark:text-white"
                     required
@@ -142,6 +169,7 @@ export default function SignupPage() {
                 <input
                     name="username"
                     placeholder="Username"
+                    value={form.username}
                     onChange={handleChange}
                     className="w-full mb-4 px-4 py-3 rounded border dark:bg-gray-900 dark:text-white"
                     required
@@ -150,6 +178,7 @@ export default function SignupPage() {
                     name="email"
                     type="email"
                     placeholder="Email"
+                    value={form.email}
                     onChange={handleChange}
                     className="w-full mb-4 px-4 py-3 rounded border dark:bg-gray-900 dark:text-white"
                     required
