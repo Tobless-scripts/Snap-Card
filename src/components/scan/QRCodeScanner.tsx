@@ -9,6 +9,8 @@ import {
     AlertCircle,
     CheckCircle,
 } from "lucide-react";
+import { getAuth } from "firebase/auth";
+import { saveScannedContact } from "@/lib/saveContact";
 
 interface CameraDevice {
     id: string;
@@ -85,6 +87,42 @@ export default function QRCodeScanner() {
         }
     }, [isScanning]);
 
+    const handleScannedData = useCallback(async (data: string) => {
+        const isVCard =
+            data.startsWith("BEGIN:VCARD") && data.includes("END:VCARD");
+
+        if (isVCard) {
+            // Download as before
+            const blob = new Blob([data], { type: "text/vcard" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "contact.vcf";
+            link.click();
+            URL.revokeObjectURL(url);
+
+            // Extract simple fields from vCard
+            const nameMatch = data.match(/FN:(.*)/);
+            const emailMatch = data.match(/EMAIL:(.*)/);
+            const phoneMatch = data.match(/TEL.*:(.*)/);
+
+            const auth = getAuth();
+            const user = auth.currentUser;
+            if (user) {
+                await saveScannedContact(user.uid, {
+                    name: nameMatch?.[1] || "Unknown",
+                    email: emailMatch?.[1] || "",
+                    phone: phoneMatch?.[1] || "",
+                    rawVCard: data,
+                });
+            }
+        } else {
+            setError("Invalid QR code. Expected a vCard format.");
+            setScannedData(null);
+            setIsScanning(false);
+        }
+    }, []);
+
     const startScanning = useCallback(async () => {
         if (!selectedCameraId) return;
 
@@ -99,10 +137,10 @@ export default function QRCodeScanner() {
             await html5QrCodeRef.current.start(
                 { deviceId: { exact: selectedCameraId } },
                 config,
-                (decodedText: string) => {
+                async (decodedText: string) => {
                     console.log("✅ QR Code Scanned:", decodedText);
-                    setScannedData(decodedText);
-                    stopScanning();
+                    await stopScanning();
+                    handleScannedData(decodedText);
                 },
                 (scanError: string) => {
                     if (!scanError.includes("No MultiFormat Readers")) {
@@ -120,18 +158,7 @@ export default function QRCodeScanner() {
         } finally {
             setIsLoading(false);
         }
-    }, [selectedCameraId, stopScanning, config]);
-
-    const handleScannedData = useCallback((data: string) => {
-        try {
-            const url = new URL(data);
-            window.open(url.toString(), "_blank", "noopener,noreferrer");
-        } catch {
-            navigator.clipboard?.writeText(data).catch((err) => {
-                console.error("Clipboard write failed:", err);
-            });
-        }
-    }, []);
+    }, [selectedCameraId, stopScanning, config, handleScannedData]);
 
     const resetScanner = useCallback(() => {
         setScannedData(null);
@@ -139,7 +166,6 @@ export default function QRCodeScanner() {
         setIsScanning(false);
     }, []);
 
-    // Adjust scanner video styling
     useEffect(() => {
         const updateVideoStyle = () => {
             if (isScanning && scannerContainerRef.current) {
@@ -262,17 +288,10 @@ export default function QRCodeScanner() {
                                     QR Code Detected
                                 </p>
                             </div>
-                            <p className="text-green-600 dark:text-green-400 break-all mb-3 text-xs sm:text-sm">
-                                {scannedData}
+                            <p className="text-green-600 dark:text-green-400 break-all mb-1 text-xs sm:text-sm">
+                                vCard scanned successfully. Check your
+                                phone&apos;s contact app.
                             </p>
-                            <button
-                                onClick={() => handleScannedData(scannedData)}
-                                className="w-full px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium cursor-pointer text-sm sm:text-base"
-                            >
-                                {scannedData.startsWith("http")
-                                    ? "Open Link"
-                                    : "Copy to Clipboard"}
-                            </button>
                         </div>
                     )}
 
@@ -286,10 +305,7 @@ export default function QRCodeScanner() {
                             </li>
                             <li>• Ensure good lighting for best results</li>
                             <li>• Hold steady until the code is detected</li>
-                            <li>
-                                • URLs will open in a new tab, other text will
-                                be copied
-                            </li>
+                            <li>• Only vCard QR codes are supported</li>
                         </ul>
                     </div>
                 </div>
