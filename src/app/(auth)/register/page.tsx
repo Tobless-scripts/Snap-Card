@@ -101,6 +101,7 @@ export default function SignupPage() {
         } catch (err: unknown) {
             if (err instanceof Error) {
                 const message = err.message;
+                console.log(message);
 
                 if (message.includes("auth/email-already-in-use")) {
                     setError("This email is already in use. Try logging in.");
