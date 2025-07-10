@@ -43,7 +43,12 @@ export default function Footer() {
                         <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
                             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                                 <p>English</p>
-                                <p>© 2025 Snap Card</p>
+                                <p>
+                                    © 2025 Snap Card —{" "}
+                                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                                        Version 1.0
+                                    </span>
+                                </p>
 
                                 <div className="flex space-x-4">
                                     {/* X (Twitter) Icon */}
@@ -75,7 +80,7 @@ export default function Footer() {
                                     {/* GitHub Icon */}
                                     <div className="relative group">
                                         <a
-                                            href="https://github.com/Tobless-scripts?tab=repositories"
+                                            href="https://github.com/Tobless-scripts/Snap-Card"
                                             className="text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors duration-200"
                                             aria-label="GitHub"
                                         >

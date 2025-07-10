@@ -9,8 +9,9 @@ import {
     AlertCircle,
     CheckCircle,
 } from "lucide-react";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { saveScannedContact } from "@/lib/saveContact";
+import Link from "next/link";
 
 interface CameraDevice {
     id: string;
@@ -26,10 +27,22 @@ export default function QRCodeScanner() {
         null
     );
     const [isLoading, setIsLoading] = useState(false);
+    const [user, setUser] = useState<User | null>(null);
+    const [authLoading, setAuthLoading] = useState(true);
 
     const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
     const qrRegionId = "qr-reader";
     const scannerContainerRef = useRef<HTMLDivElement>(null);
+
+    // Check auth state on component mount
+    useEffect(() => {
+        const auth = getAuth();
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            setAuthLoading(false);
+        });
+        return () => unsubscribe();
+    }, []);
 
     const config = useMemo<Html5QrcodeCameraScanConfig>(
         () => ({
@@ -92,24 +105,59 @@ export default function QRCodeScanner() {
             data.startsWith("BEGIN:VCARD") && data.includes("END:VCARD");
 
         if (isVCard) {
-            // Download as before
+            // Create a Blob and Object URL for the vCard file
             const blob = new Blob([data], { type: "text/vcard" });
             const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = "contact.vcf";
-            link.click();
+
+            // Attempt to share the file (for mobile devices)
+            if (
+                navigator.canShare &&
+                navigator.canShare({
+                    files: [
+                        new File([blob], "contact.vcf", { type: "text/vcard" }),
+                    ],
+                })
+            ) {
+                try {
+                    await navigator.share({
+                        files: [
+                            new File([blob], "contact.vcf", {
+                                type: "text/vcard",
+                            }),
+                        ],
+                        title: "Contact Card",
+                        text: "Add this contact to your phone",
+                    });
+                    console.log("✅ Shared via navigator.share");
+                } catch (error) {
+                    console.warn(
+                        "Sharing failed, falling back to download:",
+                        error
+                    );
+                    // fallback to download
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = "contact.vcf";
+                    link.click();
+                }
+            } else {
+                // fallback to download if Web Share API not available
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "contact.vcf";
+                link.click();
+            }
+
             URL.revokeObjectURL(url);
 
-            // Extract simple fields from vCard
-            const nameMatch = data.match(/FN:(.*)/);
-            const emailMatch = data.match(/EMAIL:(.*)/);
-            const phoneMatch = data.match(/TEL.*:(.*)/);
-
+            // Optionally save to Firestore if user is logged in
             const auth = getAuth();
-            const user = auth.currentUser;
-            if (user) {
-                await saveScannedContact(user.uid, {
+            if (auth.currentUser) {
+                const nameMatch = data.match(/FN:(.*)/);
+                const emailMatch = data.match(/EMAIL:(.*)/);
+                const phoneMatch = data.match(/TEL.*:(.*)/);
+
+                await saveScannedContact(auth.currentUser.uid, {
                     name: nameMatch?.[1] || "Unknown",
                     email: emailMatch?.[1] || "",
                     phone: phoneMatch?.[1] || "",
@@ -186,7 +234,9 @@ export default function QRCodeScanner() {
     }, [isScanning]);
 
     useEffect(() => {
-        initializeCameras();
+        if (!authLoading) {
+            initializeCameras();
+        }
         return () => {
             if (html5QrCodeRef.current) {
                 html5QrCodeRef.current
@@ -195,11 +245,41 @@ export default function QRCodeScanner() {
                     .catch(console.error);
             }
         };
-    }, [initializeCameras]);
+    }, [authLoading, initializeCameras]);
+
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
             <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12 md:py-16">
+                {!user && (
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
+                        <p className="text-yellow-700 dark:text-yellow-300 text-center">
+                            For full functionality, please{" "}
+                            <Link
+                                href="/login"
+                                className="font-semibold underline"
+                            >
+                                log in
+                            </Link>{" "}
+                            or{" "}
+                            <Link
+                                href="/register"
+                                className="font-semibold underline"
+                            >
+                                create an account
+                            </Link>{" "}
+                            to save your scanned contacts.
+                        </p>
+                    </div>
+                )}
+
                 <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 lg:p-10">
                     <div
                         ref={scannerContainerRef}
@@ -292,6 +372,11 @@ export default function QRCodeScanner() {
                                 vCard scanned successfully. Check your
                                 phone&apos;s contact app.
                             </p>
+                            {user && (
+                                <p className="text-green-600 dark:text-green-400 text-xs sm:text-sm mt-2">
+                                    Contact has been saved to your account.
+                                </p>
+                            )}
                         </div>
                     )}
 
@@ -306,6 +391,12 @@ export default function QRCodeScanner() {
                             <li>• Ensure good lighting for best results</li>
                             <li>• Hold steady until the code is detected</li>
                             <li>• Only vCard QR codes are supported</li>
+                            {!user && (
+                                <li className="font-semibold">
+                                    • Login to save scanned contacts to your
+                                    account
+                                </li>
+                            )}
                         </ul>
                     </div>
                 </div>

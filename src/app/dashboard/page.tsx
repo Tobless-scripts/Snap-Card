@@ -5,8 +5,7 @@ import { getAuth, onAuthStateChanged, signOut, User } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Image from "next/image";
-
-// Lucide React icons
+import Link from "next/link";
 import {
     Linkedin,
     Twitter,
@@ -22,7 +21,6 @@ import {
     ExternalLink,
     LogOut,
 } from "lucide-react";
-import Link from "next/link";
 
 interface ProfileData {
     email: string;
@@ -40,6 +38,45 @@ interface ProfileData {
     };
 }
 
+// CTA component
+function DashboardCTA({ user }: { user: User | null }) {
+    const auth = getAuth();
+    if (user) {
+        return (
+            <div className="flex gap-2 justify-end mb-4">
+                <Link
+                    href="/profile"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                    Profile
+                </Link>
+                <button
+                    className="px-4 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 cursor-pointer"
+                    onClick={() => signOut(auth)}
+                >
+                    Sign Out
+                </button>
+            </div>
+        );
+    }
+    return (
+        <div className="flex gap-2 justify-center items-center mb-4">
+            <Link
+                href="/login"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+                Sign In
+            </Link>
+            <Link
+                href="/register"
+                className="px-4 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300"
+            >
+                Create Account
+            </Link>
+        </div>
+    );
+}
+
 export default function Dashboard() {
     const auth = getAuth();
     const [user, setUser] = useState<User | null>(null);
@@ -55,8 +92,10 @@ export default function Dashboard() {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            if (!user?.email) return;
-
+            if (!user?.email) {
+                setLoading(false);
+                return;
+            }
             const docRef = doc(db, "profiles", user.email);
             const snap = await getDoc(docRef);
 
@@ -87,9 +126,9 @@ export default function Dashboard() {
         };
 
         if (user) fetchProfile();
+        else setLoading(false);
     }, [user]);
 
-    // 🔐 Sign‑out handler
     const handleSignOut = () => {
         signOut(auth).catch((error) =>
             console.error("Error signing out:", error)
@@ -106,8 +145,9 @@ export default function Dashboard() {
 
     if (!user || !profile) {
         return (
-            <div className="text-center text-gray-600 dark:text-gray-300 py-12 px-4 min-h-screen flex items-center justify-center">
-                <div className="max-w-md w-full">
+            <main className="min-h-screen bg-gray-50 mx-auto dark:bg-gray-950 text-gray-950 dark:text-gray-50 py-12">
+                <div className="max-w-md mx-auto text-center">
+                    <DashboardCTA user={user} />
                     <h2 className="text-xl md:text-2xl font-semibold mb-4">
                         Authentication Required
                     </h2>
@@ -115,7 +155,7 @@ export default function Dashboard() {
                         Please sign in to view your dashboard.
                     </p>
                 </div>
-            </div>
+            </main>
         );
     }
 
@@ -144,11 +184,13 @@ export default function Dashboard() {
             url: profile.links.tiktok,
             color: "text-black hover:text-gray-800 dark:text-white dark:hover:text-gray-300",
         },
-    ].filter((link) => link.url); // Only keep links that have a URL
+    ].filter((link) => link.url);
 
     return (
         <main className="min-h-screen bg-gray-50 dark:bg-gray-950">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+                <DashboardCTA user={user} />
+
                 {/* Header */}
                 <div className="mb-6 sm:mb-8">
                     <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 text-gray-900 dark:text-white">
@@ -389,7 +431,7 @@ export default function Dashboard() {
                                 </div>
                             </Link>
 
-                            {/* 🚪 Sign Out (NEW) */}
+                            {/* Sign Out */}
                             <button
                                 onClick={handleSignOut}
                                 className="w-full p-4 sm:p-5 lg:p-6 bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-lg border border-red-200 dark:border-red-700 hover:shadow-xl transition-all duration-200 text-left group cursor-pointer"
@@ -406,7 +448,7 @@ export default function Dashboard() {
                                     Sign Out
                                 </h4>
                                 <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                                    Log out of your Snap Card account
+                                    Log out of your Snap Card account
                                 </p>
                             </button>
                         </div>

@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import {
     Edit3,
     QrCode,
@@ -12,6 +16,27 @@ import {
 import Link from "next/link";
 
 const SnapCard = () => {
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const auth = getAuth();
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
             {/* Hero Section */}
@@ -73,12 +98,19 @@ const SnapCard = () => {
                             tap.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link href="/register">
-                                <button className="bg-white text-blue-600 dark:bg-gray-100 dark:text-blue-700 px-8 py-4 max-md:w-full rounded-lg font-semibold text-lg hover:bg-gray-50 dark:hover:bg-gray-200 transition-colors cursor-pointer">
-                                    Sign Up Now
-                                </button>
-                            </Link>
-
+                            {user ? (
+                                <Link href="/dashboard">
+                                    <button className="bg-white text-blue-600 dark:bg-gray-100 dark:text-blue-700 px-8 py-4 max-md:w-full rounded-lg font-semibold text-lg hover:bg-gray-50 dark:hover:bg-gray-200 transition-colors cursor-pointer">
+                                        Go to Dashboard
+                                    </button>
+                                </Link>
+                            ) : (
+                                <Link href="/register">
+                                    <button className="bg-white text-blue-600 dark:bg-gray-100 dark:text-blue-700 px-8 py-4 max-md:w-full rounded-lg font-semibold text-lg hover:bg-gray-50 dark:hover:bg-gray-200 transition-colors cursor-pointer">
+                                        Sign Up Now
+                                    </button>
+                                </Link>
+                            )}
                             <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/10 transition-colors cursor-pointer">
                                 Learn More
                             </button>
@@ -306,15 +338,33 @@ const SnapCard = () => {
                         networking. Get started with Snap Card today!
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button className="bg-white text-blue-600 dark:bg-gray-100 dark:text-blue-700 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-50 dark:hover:bg-gray-200 transition-colors cursor-pointer">
-                            Create My Free Card
-                        </button>
+                        {user ? (
+                            <Link href="/dashboard">
+                                <button className="bg-white text-blue-600 dark:bg-gray-100 dark:text-blue-700 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-50 dark:hover:bg-gray-200 transition-colors cursor-pointer">
+                                    Go to My Dashboard
+                                </button>
+                            </Link>
+                        ) : (
+                            <Link href="/register">
+                                <button className="bg-white text-blue-600 dark:bg-gray-100 dark:text-blue-700 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-50 dark:hover:bg-gray-200 transition-colors cursor-pointer">
+                                    Create My Free Card
+                                </button>
+                            </Link>
+                        )}
 
-                        <Link href="/login">
-                            <button className="border-2 w-full border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/10 transition-colors cursor-pointer">
-                                I Already Have an Account
-                            </button>
-                        </Link>
+                        {user ? (
+                            <Link href="/profile">
+                                <button className="border-2 w-full border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/10 transition-colors cursor-pointer">
+                                    Edit My Profile
+                                </button>
+                            </Link>
+                        ) : (
+                            <Link href="/login">
+                                <button className="border-2 w-full border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/10 transition-colors cursor-pointer">
+                                    I Already Have an Account
+                                </button>
+                            </Link>
+                        )}
                     </div>
                 </div>
             </section>

@@ -5,6 +5,10 @@ export const content = [
     "./components/**/*.{js,ts,jsx,tsx}",
 ];
 export const theme = {
-    extend: {},
+    extend: {
+        screens: {
+            mdx: "768px",
+        },
+    },
 };
 export const plugins = [];

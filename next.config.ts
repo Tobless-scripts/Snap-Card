@@ -1,7 +1,85 @@
 import type { NextConfig } from "next";
+import withPWA from "next-pwa";
 
+/**
+ * Next.js base configuration
+ */
 const nextConfig: NextConfig = {
-  /* config options here */
+    reactStrictMode: true,
+    // Updated Turbopack configuration
+    turbopack: {
+        resolveAlias: {
+            "@components": "./src/components",
+            "@utils": "./src/utils",
+        },
+    },
+    // Remove swcMinify as it's handled automatically
 };
 
-export default nextConfig;
+/**
+ * PWA Configuration (production-only)
+ */
+const pwaConfig = {
+    dest: "public",
+    register: true,
+    skipWaiting: true,
+    disable: process.env.NODE_ENV === "development",
+    runtimeCaching: [
+        // Cache Google Fonts
+        {
+            urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+                cacheName: "google-fonts",
+                expiration: {
+                    maxEntries: 4,
+                    maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+                },
+            },
+        },
+        // Cache images
+        {
+            urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|webp|ico)/i,
+            handler: "StaleWhileRevalidate",
+            options: {
+                cacheName: "images",
+                expiration: {
+                    maxEntries: 60,
+                    maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+                },
+            },
+        },
+        // Cache Firebase Firestore requests
+        {
+            urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*/i,
+            handler: "NetworkFirst",
+            options: {
+                cacheName: "firebase-firestore",
+                networkTimeoutSeconds: 10,
+                expiration: {
+                    maxEntries: 50,
+                    maxAgeSeconds: 24 * 60 * 60, // 1 day
+                },
+            },
+        },
+        // Cache HTML pages (SSR/SSG)
+        {
+            urlPattern: ({ request }: { request: Request }) =>
+                request.destination === "document" ||
+                request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+                cacheName: "html-pages",
+                expiration: {
+                    maxEntries: 50,
+                    maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+                },
+            },
+        },
+    ],
+};
+
+// Enable PWA only in production builds
+export default process.env.NODE_ENV === "production"
+    ? withPWA(pwaConfig)(nextConfig)
+    : nextConfig;
