@@ -6,14 +6,13 @@ import withPWA from "next-pwa";
  */
 const nextConfig: NextConfig = {
     reactStrictMode: true,
-    // Updated Turbopack configuration
     turbopack: {
         resolveAlias: {
             "@components": "./src/components",
             "@utils": "./src/utils",
         },
     },
-    // Remove swcMinify as it's handled automatically
+    // swcMinify is handled automatically in recent Next.js versions
 };
 
 /**
@@ -24,6 +23,12 @@ const pwaConfig = {
     register: true,
     skipWaiting: true,
     disable: process.env.NODE_ENV === "development",
+    dynamicStartUrl: false, // Prevent issues with dynamic routes and start URL
+    exclude: [
+        /^.*\/_next\/app-build-manifest\.json$/,
+        /^.*\/_next\/build-manifest\.json$/,
+        /^.*\/_next\/static\/.*\.map$/,
+    ], // Exclude files that are not accessible in production
     runtimeCaching: [
         // Cache Google Fonts
         {
