@@ -67,7 +67,7 @@ SnapCard lets users instantly **create**, **share**, and **scan** professional d
 
 ```bash
 # Clone the repo
-git clone https://github.com/Tobless-scripts/snapcard.git
+https://github.com/Tobless-scripts/Snap-Card.git
 
 # Go to the project folder
 cd snapcard

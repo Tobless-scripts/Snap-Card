@@ -77,7 +77,7 @@ const pwaConfig = {
                 cacheName: "html-pages",
                 expiration: {
                     maxEntries: 50,
-                    maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+                    maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
                 },
             },
         },
