@@ -6,29 +6,22 @@ import withPWA from "next-pwa";
  */
 const nextConfig: NextConfig = {
     reactStrictMode: true,
-    turbopack: {
-        resolveAlias: {
-            "@components": "./src/components",
-            "@utils": "./src/utils",
-        },
-    },
-    // swcMinify is handled automatically in recent Next.js versions
 };
 
 /**
- * PWA Configuration (production-only)
+ * PWA Configuration
  */
 const pwaConfig = {
     dest: "public",
-    register: true,
+    register: false, // We'll handle registration manually
     skipWaiting: true,
     disable: process.env.NODE_ENV === "development",
-    dynamicStartUrl: false, // Prevent issues with dynamic routes and start URL
+    dynamicStartUrl: false,
     exclude: [
         /^.*\/_next\/app-build-manifest\.json$/,
         /^.*\/_next\/build-manifest\.json$/,
         /^.*\/_next\/static\/.*\.map$/,
-    ], // Exclude files that are not accessible in production
+    ],
     runtimeCaching: [
         // Cache Google Fonts
         {
@@ -67,24 +60,34 @@ const pwaConfig = {
                 },
             },
         },
-        // Cache HTML pages (SSR/SSG)
+        // Cache HTML pages (App Router)
         {
             urlPattern: ({ request }: { request: Request }) =>
-                request.destination === "document" ||
-                request.mode === "navigate",
+                request.destination === "document",
             handler: "NetworkFirst",
             options: {
                 cacheName: "html-pages",
                 expiration: {
                     maxEntries: 50,
-                    maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+                    maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+                },
+            },
+        },
+        // Cache API routes
+        {
+            urlPattern: /^.*\/api\/.*/i,
+            handler: "NetworkFirst",
+            options: {
+                cacheName: "api-cache",
+                networkTimeoutSeconds: 10,
+                expiration: {
+                    maxEntries: 20,
+                    maxAgeSeconds: 5 * 60, // 5 minutes
                 },
             },
         },
     ],
 };
 
-// Enable PWA only in production builds
-export default process.env.NODE_ENV === "production"
-    ? withPWA(pwaConfig)(nextConfig)
-    : nextConfig;
+// Apply PWA wrapper
+export default withPWA(pwaConfig)(nextConfig);

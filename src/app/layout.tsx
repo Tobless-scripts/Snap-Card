@@ -2,6 +2,7 @@ import ClientLayoutWrapper from "@/components/ClientLayoutWrapper";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import AppInstallPrompt from "@/components/Install/AppInstallationPrompt";
+import ServiceWorkerRegister from "./sw-register";
 
 export const metadata: Metadata = {
     metadataBase: new URL(
@@ -88,6 +89,7 @@ export default function RootLayout({
             <body className="bg-white dark:bg-gray-900 transition-colors duration-300">
                 <AppInstallPrompt />
                 <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+                <ServiceWorkerRegister />
             </body>
         </html>
     );
