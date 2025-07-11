@@ -1,29 +1,36 @@
 import type { NextConfig } from "next";
 import withPWA from "next-pwa";
 
+/**
+ * Base Next.js config
+ */
 const nextConfig: NextConfig = {
     reactStrictMode: true,
-    turbopack: {
-        resolveAlias: {},
-    },
+    turbopack: { resolveAlias: {} },
 };
 
+/**
+ * PWA config
+ */
 const pwaConfig = {
     dest: "public",
     register: true,
     skipWaiting: true,
-    disable: false,
-    dynamicStartUrl: "/",
     cacheOnFrontEndNav: true,
     reloadOnOnline: true,
+
+    // Offline support
     additionalManifestEntries: [{ url: "/offline", revision: null }],
-    exclude: [
-        /middleware-manifest\.json$/,
-        /_buildManifest\.js$/,
-        /_ssgManifest\.js$/,
-        /^.*\/_next\/static\/.*\.map$/,
-        /^.*\/_next\/server\/.*/, // avoid broken internal routes
-    ],
+    fallbacks: {
+        document: "/offline",
+    },
+
+    disable: process.env.NODE_ENV === "development",
+    dynamicStartUrl: false,
+
+    buildExcludes: [/middleware-manifest\.json$/],
+    exclude: [/^.*\/_next\/static\/.*\.map$/, /^.*\/_next\/server\/.*/],
+
     runtimeCaching: [
         {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
