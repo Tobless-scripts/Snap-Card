@@ -16,7 +16,7 @@ const pwaConfig = {
     register: true,
     skipWaiting: true,
     disable: false,
-    dynamicStartUrl: false,
+    dynamicStartUrl: true,
     exclude: [
         /^.*\/_next\/app-build-manifest\.json$/,
         /^.*\/_next\/build-manifest\.json$/,
@@ -63,7 +63,8 @@ const pwaConfig = {
         // Cache HTML pages (App Router)
         {
             urlPattern: ({ request }: { request: Request }) =>
-                request.destination === "document",
+                request.destination === "document" ||
+                request.mode === "navigate",
             handler: "NetworkFirst",
             options: {
                 cacheName: "html-pages",
