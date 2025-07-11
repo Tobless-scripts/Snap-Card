@@ -1,94 +1,81 @@
 import type { NextConfig } from "next";
 import withPWA from "next-pwa";
 
-/**
- * Next.js base configuration
- */
 const nextConfig: NextConfig = {
     reactStrictMode: true,
+    turbopack: {
+        resolveAlias: {},
+    },
 };
 
-/**
- * PWA Configuration
- */
 const pwaConfig = {
     dest: "public",
     register: true,
     skipWaiting: true,
     disable: false,
     dynamicStartUrl: true,
+    cacheOnFrontEndNav: true,
+    reloadOnOnline: true,
+    additionalManifestEntries: [
+        { url: "/offline", revision: Date.now().toString() },
+        { url: "/", revision: Date.now().toString() },
+    ],
     exclude: [
-        /^.*\/_next\/app-build-manifest\.json$/,
-        /^.*\/_next\/build-manifest\.json$/,
+        /middleware-manifest\.json$/,
+        /_buildManifest\.js$/,
+        /_ssgManifest\.js$/,
         /^.*\/_next\/static\/.*\.map$/,
     ],
     runtimeCaching: [
-        // Cache Google Fonts
         {
-            urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
+            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
             handler: "CacheFirst",
             options: {
                 cacheName: "google-fonts",
                 expiration: {
-                    maxEntries: 4,
-                    maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+                    maxEntries: 10,
+                    maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
                 },
             },
         },
-        // Cache images
         {
-            urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|webp|ico)/i,
+            urlPattern: /^\/_next\/static\/.*/i,
+            handler: "CacheFirst",
+            options: {
+                cacheName: "static-resources",
+                expiration: {
+                    maxEntries: 100,
+                    maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                },
+            },
+        },
+        {
+            urlPattern: /^\/$/i,
+            handler: "NetworkFirst",
+            options: {
+                cacheName: "start-url",
+                expiration: {
+                    maxEntries: 1,
+                    maxAgeSeconds: 60 * 60 * 24, // 1 day
+                },
+            },
+        },
+        {
+            urlPattern: /^\/offline$/i,
             handler: "StaleWhileRevalidate",
             options: {
-                cacheName: "images",
-                expiration: {
-                    maxEntries: 60,
-                    maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-                },
-            },
-        },
-        // Cache Firebase Firestore requests
-        {
-            urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*/i,
-            handler: "NetworkFirst",
-            options: {
-                cacheName: "firebase-firestore",
-                networkTimeoutSeconds: 10,
-                expiration: {
-                    maxEntries: 50,
-                    maxAgeSeconds: 24 * 60 * 60, // 1 day
-                },
-            },
-        },
-        // Cache HTML pages (App Router)
-        {
-            urlPattern: ({ request }: { request: Request }) =>
-                request.destination === "document" ||
-                request.mode === "navigate",
-            handler: "NetworkFirst",
-            options: {
-                cacheName: "html-pages",
-                expiration: {
-                    maxEntries: 50,
-                    maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
-                },
-            },
-        },
-        // Cache API routes
-        {
-            urlPattern: /^.*\/api\/.*/i,
-            handler: "NetworkFirst",
-            options: {
-                cacheName: "api-cache",
-                networkTimeoutSeconds: 10,
-                expiration: {
-                    maxEntries: 20,
-                    maxAgeSeconds: 5 * 60, // 5 minutes
-                },
+                cacheName: "offline-page",
             },
         },
     ],
 };
 
-// Apply PWA wrapper
+if (process.env.NODE_ENV === "development") {
+    pwaConfig.dynamicStartUrl = false;
+    if (!globalThis.__pwa_init) {
+        console.log("PWA is running in development mode");
+        globalThis.__pwa_init = true;
+    }
+}
+
 export default withPWA(pwaConfig)(nextConfig);
