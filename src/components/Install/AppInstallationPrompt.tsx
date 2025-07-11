@@ -98,7 +98,7 @@ export default function AppInstallPrompt() {
                     Experience SnapCard as a fast, professional business tool.
                     Add to your device for quick access—no App Store required.
                 </p>
-                <div className="flex gap-2">
+                <div className="block md:flex gap-2">
                     <button
                         onClick={handleInstallClick}
                         className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors"
