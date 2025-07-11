@@ -13,9 +13,9 @@ const nextConfig: NextConfig = {
  */
 const pwaConfig = {
     dest: "public",
-    register: false, // We'll handle registration manually
+    register: true,
     skipWaiting: true,
-    disable: process.env.NODE_ENV === "development",
+    disable: false,
     dynamicStartUrl: false,
     exclude: [
         /^.*\/_next\/app-build-manifest\.json$/,
