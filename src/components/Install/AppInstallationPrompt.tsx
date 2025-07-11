@@ -80,7 +80,7 @@ export default function AppInstallPrompt() {
     if (!showPrompt) return null;
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 max-w-sm bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-2xl shadow-2xl p-6 flex items-center gap-4 animate-fade-in">
+        <div className="fixed bottom-6 right-6 z-50 max-w-md bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-2xl shadow-2xl p-6 flex flex-wrap items-center gap-4 animate-fade-in">
             <div className="relative w-14 h-14 rounded-xl overflow-hidden border bg-gray-100 dark:bg-gray-800 flex-shrink-0">
                 <Image
                     src="/mobile.webp"
@@ -98,7 +98,7 @@ export default function AppInstallPrompt() {
                     Experience SnapCard as a fast, professional business tool.
                     Add to your device for quick access—no App Store required.
                 </p>
-                <div className="block  md:flex gap-2">
+                <div className="block space-y-4 md:flex gap-2">
                     <div>
                         <button
                             onClick={handleInstallClick}
