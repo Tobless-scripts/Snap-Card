@@ -1,6 +1,9 @@
-# 📇 SnapCard
+# 📇 SnapCard (v1)
 
 SnapCard lets users instantly **create**, **share**, and **scan** professional digital contact cards (vCards) using QR codes — all in a sleek and modern web experience.
+
+> 🧪 **This is version 1** — we're just getting started!  
+> 🚀 A new update is coming soon with more features, improvements, and polish.
 
 ---
 
@@ -34,7 +37,7 @@ SnapCard lets users instantly **create**, **share**, and **scan** professional d
 
 ## 🌍 Live Demo
 
-[👉 Visit SnapCard (Live URL)] (https://snap-card-one.vercel.app/)
+👉 [Visit SnapCard](https://snap-card-one.vercel.app/)
 
 ---
 
@@ -67,7 +70,7 @@ SnapCard lets users instantly **create**, **share**, and **scan** professional d
 
 ```bash
 # Clone the repo
-https://github.com/Tobless-scripts/Snap-Card.git
+git clone https://github.com/Tobless-scripts/Snap-Card.git
 
 # Go to the project folder
 cd snapcard
