@@ -1,5 +1,6 @@
 import ClientLayoutWrapper from "@/components/ClientLayoutWrapper";
 import "./globals.css";
+import ServiceWorkerRegister from "./sw-register";
 import type { Metadata, Viewport } from "next";
 import AppInstallPrompt from "@/components/Install/AppInstallationPrompt";
 
@@ -88,6 +89,7 @@ export default function RootLayout({
             <body className="bg-white dark:bg-gray-900 transition-colors duration-300">
                 <AppInstallPrompt />
                 <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+                <ServiceWorkerRegister />
             </body>
         </html>
     );
