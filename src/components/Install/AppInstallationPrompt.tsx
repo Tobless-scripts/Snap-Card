@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { X } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
     readonly platforms: string[];
@@ -35,7 +36,7 @@ export default function AppInstallPrompt() {
             // Wait 7 seconds before showing
             setTimeout(() => {
                 setShowPrompt(true);
-            }, 7000);
+            }, 10000);
         };
 
         window.addEventListener(
@@ -48,7 +49,7 @@ export default function AppInstallPrompt() {
         if (isIOS && !isInstalled) {
             setTimeout(() => {
                 setShowPrompt(true);
-            }, 7000);
+            }, 10000);
         }
 
         return () => {
@@ -81,14 +82,22 @@ export default function AppInstallPrompt() {
 
     return (
         <div className="fixed bottom-6 right-6 z-50 max-w-md bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-2xl shadow-2xl p-6 flex flex-wrap items-center gap-4 animate-fade-in">
-            <div className="relative w-14 h-14 rounded-xl overflow-hidden border bg-gray-100 dark:bg-gray-800 flex-shrink-0">
-                <Image
-                    src="/mobile.webp"
-                    alt="SnapCard App"
-                    width={56}
-                    height={56}
-                    className="object-cover w-full h-full"
-                />
+            <div className="flex justify-between w-full items-center flex-wrap">
+                <div className="relative w-14 h-14 rounded-xl overflow-hidden border bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+                    <Image
+                        src="/mobile.webp"
+                        alt="SnapCard App"
+                        width={56}
+                        height={56}
+                        className="object-cover w-full h-full"
+                    />
+                </div>
+                <div>
+                    <X
+                        onClick={() => setShowPrompt(!showPrompt)}
+                        className="text-gray-800 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white cursor-pointer transition-colors duration-300 ease-in-out"
+                    />
+                </div>
             </div>
             <div className="flex-1">
                 <h3 className="font-bold text-gray-900 dark:text-white leading-tight mb-1">
@@ -98,23 +107,19 @@ export default function AppInstallPrompt() {
                     Experience SnapCard as a fast, professional business tool.
                     Add to your device for quick access—no App Store required.
                 </p>
-                <div className="block space-y-4 md:flex gap-2">
+                <div className="flex flex-wrap gap-6 md:space-y-0 md:items-center">
                     <div>
                         <button
                             onClick={handleInstallClick}
-                            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors"
+                            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors cursor-pointer"
                         >
                             Install Now
                         </button>
                     </div>
                     <div>
-                        <a
-                            href="/snapcard.apk"
-                            download
-                            className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-800 text-white font-semibold text-sm transition-colors"
-                        >
+                        <button className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-800 text-white font-semibold text-sm transition-colors cursor-pointer">
                             Download App
-                        </a>
+                        </button>
                     </div>
                 </div>
                 <div className="mt-2 text-xs text-gray-400 dark:text-gray-500">
