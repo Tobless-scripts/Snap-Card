@@ -81,3 +81,12 @@ npm install
 # Start the development server
 npm run dev
 ```
+
+## 🔐 Test Login Credentials
+
+You can use the following credentials to explore the app without creating a new account:
+
+**Email:** `fatairollingdollar3@gmail.com`  
+**Password:** `Logintest_34`
+
+> ⚠️ Note: This account has limited access and resets periodically.

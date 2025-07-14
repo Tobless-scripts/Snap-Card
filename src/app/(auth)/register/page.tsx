@@ -54,27 +54,32 @@ export default function SignupPage() {
         const nameRegex = /^[a-zA-Z\s]{2,30}$/;
         const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const passwordRegex =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@\-_=!$%&*#^+]).{8,}$/;
 
         if (!nameRegex.test(form.name)) {
             setLoading(false);
-            return setError("Invalid name");
+            return setError(
+                "Name should be 2–30 letters (you may include spaces, hyphens, or ’)."
+            );
         }
+
         if (!usernameRegex.test(form.username)) {
             setLoading(false);
-            return setError("Invalid username");
+            return setError(
+                "Username must be 3–20 characters, letters/numbers/underscore only, no trailing underscore."
+            );
         }
+
         if (!emailRegex.test(form.email)) {
             setLoading(false);
-            return setError("Invalid email");
+            return setError("Please enter a valid e‑mail address.");
         }
-        if (
-            form.password.length < 8 ||
-            !/[0-9]/.test(form.password) ||
-            !/[@\-_=!$%&*#^+]/.test(form.password)
-        ) {
+
+        if (!passwordRegex.test(form.password)) {
             setLoading(false);
             return setError(
-                "Password must be at least 8 characters and include a number and a special character."
+                "Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character."
             );
         }
 

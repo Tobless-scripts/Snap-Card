@@ -4,10 +4,8 @@ import { useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function ForgotPasswordPage() {
-    const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
@@ -19,10 +17,14 @@ export default function ForgotPasswordPage() {
         setError("");
         setLoading(true);
 
+        const actionCodeSettings = {
+            url: "https://snap-card-one.vercel.app/forgot-password", // Custom reset page
+            handleCodeInApp: true,
+        };
+
         try {
-            await sendPasswordResetEmail(auth, email);
+            await sendPasswordResetEmail(auth, email, actionCodeSettings);
             setMessage("Password reset email sent! Check your inbox.");
-            router.push("/dashboard");
         } catch (err: unknown) {
             if (err instanceof Error) {
                 const message = err.message;
@@ -31,18 +33,20 @@ export default function ForgotPasswordPage() {
                     setError("This email is already in use. Try logging in.");
                 } else if (message.includes("auth/invalid-email")) {
                     setError("Invalid email address.");
-                } else if (message.includes("auth/weak-password")) {
-                    setError("Password is too weak.");
+                } else if (message.includes("auth/user-not-found")) {
+                    setError("No user found with that email.");
                 } else if (message.includes("auth/network-request-failed")) {
                     setError("Network error. Check your connection.");
                 } else if (message.includes("auth/operation-not-allowed")) {
-                    setError("Sign up is disabled. Try again later.");
+                    setError("Password reset is currently disabled.");
                 } else {
                     setError(
                         "Failed to send reset email. Check the email address."
                     );
                 }
             }
+        } finally {
+            setLoading(false);
         }
     };
 
