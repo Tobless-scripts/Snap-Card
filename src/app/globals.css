@@ -16,6 +16,11 @@
     --background-color: #181d25; /* Dark mode */
 }
 
+:root {
+    --primary: #1d4ed8;
+    --primary-foreground: #ffffff;
+}
+
 @keyframes fade-in-out {
     0% {
         opacity: 0;

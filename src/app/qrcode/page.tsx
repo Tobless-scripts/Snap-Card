@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import Image from "next/image";
@@ -7,21 +6,7 @@ import { db } from "@/lib/firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { shareVCard as doShareVCard } from "@/lib/shareVcard";
-
-interface ProfileData {
-    displayName: string;
-    email: string;
-    phone?: string;
-    company?: string;
-    role?: string;
-    photoURL?: string;
-    links: {
-        instagram?: string;
-        twitter?: string;
-        linkedin?: string;
-        tiktok?: string;
-    };
-}
+import { generateVCard, ProfileData } from "@/lib/generateVcard";
 
 export default function QRCodePage() {
     const auth = getAuth();
@@ -40,18 +25,15 @@ export default function QRCodePage() {
                 setLoading(false);
             }
         });
-
         return () => unsubscribe();
     }, [auth]);
 
     useEffect(() => {
         const fetchProfileAndGenerateQR = async () => {
             if (!userEmail) return;
-
             try {
                 const docRef = doc(db, "profiles", userEmail);
                 const docSnap = await getDoc(docRef);
-
                 if (!docSnap.exists()) {
                     console.error("Profile not found");
                     setLoading(false);
@@ -60,22 +42,7 @@ export default function QRCodePage() {
 
                 const data = docSnap.data() as ProfileData;
                 setProfile(data);
-
-                const vCard = `
-BEGIN:VCARD
-VERSION:3.0
-FN:${data.displayName}
-ORG:${data.company || ""}
-TITLE:${data.role || ""}
-TEL;TYPE=CELL:${data.phone || ""}
-EMAIL:${data.email}
-${data.links?.linkedin ? `URL;TYPE=LinkedIn:${data.links.linkedin}` : ""}
-${data.links?.twitter ? `URL;TYPE=Twitter:${data.links.twitter}` : ""}
-${data.links?.instagram ? `URL;TYPE=Instagram:${data.links.instagram}` : ""}
-${data.links?.tiktok ? `URL;TYPE=TikTok:${data.links.tiktok}` : ""}
-END:VCARD
-        `.trim();
-
+                const vCard = generateVCard(data);
                 const qrImage = await QRCode.toDataURL(vCard);
                 setQr(qrImage);
             } catch (error) {
@@ -85,34 +52,12 @@ END:VCARD
             }
         };
 
-        if (userEmail) {
-            fetchProfileAndGenerateQR();
-        }
+        if (userEmail) fetchProfileAndGenerateQR();
     }, [userEmail]);
 
     const handleDownloadVCard = () => {
         if (!profile) return;
-
-        const vCard = `
-BEGIN:VCARD
-VERSION:3.0
-FN:${profile.displayName}
-ORG:${profile.company || ""}
-TITLE:${profile.role || ""}
-TEL;TYPE=CELL:${profile.phone || ""}
-EMAIL:${profile.email}
-${profile.photoURL ? `PHOTO;VALUE=URI:${profile.photoURL}` : ""}
-${profile.links?.linkedin ? `URL;TYPE=LinkedIn:${profile.links.linkedin}` : ""}
-${profile.links?.twitter ? `URL;TYPE=Twitter:${profile.links.twitter}` : ""}
-${
-    profile.links?.instagram
-        ? `URL;TYPE=Instagram:${profile.links.instagram}`
-        : ""
-}
-${profile.links?.tiktok ? `URL;TYPE=TikTok:${profile.links.tiktok}` : ""}
-END:VCARD
-        `.trim();
-
+        const vCard = generateVCard(profile);
         const blob = new Blob([vCard], { type: "text/vcard" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -134,23 +79,11 @@ END:VCARD
     };
 
     if (loading) {
-        return (
-            <main className="flex flex-col items-center justify-center h-screen text-center">
-                <p className="text-gray-500 animate-pulse">
-                    Loading your QR Code...
-                </p>
-            </main>
-        );
+        return <p>Loading QR Code...</p>;
     }
 
     if (!profile) {
-        return (
-            <main className="flex flex-col items-center justify-center h-screen text-center">
-                <p className="text-red-500 font-medium">
-                    No profile found. Please sign in to generate your QR code.
-                </p>
-            </main>
-        );
+        return <p>No profile found.</p>;
     }
 
     return (

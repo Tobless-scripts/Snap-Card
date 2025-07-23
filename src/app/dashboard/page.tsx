@@ -338,6 +338,26 @@ export default function Dashboard() {
                             Quick Actions
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-4 lg:gap-6">
+                            <Link href="/download" className="block">
+                                <div className="w-full p-4 sm:p-5 lg:p-6 bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-200 text-left group cursor-pointer">
+                                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                                        <div className="p-2 sm:p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg sm:rounded-xl">
+                                            <QrCode
+                                                size={20}
+                                                className="text-indigo-600 dark:text-indigo-400"
+                                            />
+                                        </div>
+                                    </div>
+                                    <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                                        Download Card
+                                    </h4>
+                                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                                        Choose a format and download your
+                                        business card
+                                    </p>
+                                </div>
+                            </Link>
+
                             <Link href="/profile" className="block">
                                 <div className="w-full p-4 sm:p-5 lg:p-6 bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-200 text-left group cursor-pointer">
                                     <div className="flex items-center justify-between mb-2 sm:mb-3">

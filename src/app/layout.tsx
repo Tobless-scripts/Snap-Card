@@ -3,6 +3,7 @@ import "./globals.css";
 import ServiceWorkerRegister from "./sw-register";
 import type { Metadata, Viewport } from "next";
 import AppInstallPrompt from "@/components/Install/AppInstallationPrompt";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
     metadataBase: new URL(
@@ -87,9 +88,11 @@ export default function RootLayout({
                 <link rel="manifest" href="/manifest.json" />
             </head>
             <body className="bg-white dark:bg-gray-900 transition-colors duration-300">
-                <AppInstallPrompt />
-                <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
-                <ServiceWorkerRegister />
+                <ClerkProvider>
+                    <AppInstallPrompt />
+                    <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+                    <ServiceWorkerRegister />
+                </ClerkProvider>
             </body>
         </html>
     );
