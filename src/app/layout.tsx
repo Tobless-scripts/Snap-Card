@@ -4,6 +4,7 @@ import ServiceWorkerRegister from "./sw-register";
 import type { Metadata, Viewport } from "next";
 import AppInstallPrompt from "@/components/Install/AppInstallationPrompt";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
     metadataBase: new URL(
@@ -91,6 +92,7 @@ export default function RootLayout({
                 <ClerkProvider>
                     <AppInstallPrompt />
                     <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+                    <Analytics />
                     <ServiceWorkerRegister />
                 </ClerkProvider>
             </body>
