@@ -76,7 +76,7 @@ export const CARD_SIZES = {
         },
     },
     large: {
-        width: 650,
+        width: 610,
         height: 370,
         avatar: 94,
         qrSize: 180,
