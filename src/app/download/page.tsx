@@ -10,6 +10,7 @@ import BusinessCardFront from "@/components/download/BusinessCardFront";
 import CardBack from "@/components/download/BusinessCardBack";
 import Button from "@/components/ui/Button";
 import { toPng } from "html-to-image";
+import { CARD_SIZES } from "@/lib/cardSizes";
 
 export default function DownloadCardPage() {
     const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -61,6 +62,8 @@ export default function DownloadCardPage() {
                 backgroundColor: theme === "dark" ? "#111827" : "#f9fafb",
                 quality: 1,
                 pixelRatio: 3,
+                width: CARD_SIZES.large.width,
+                height: CARD_SIZES.large.height,
             });
 
             // Download back card
@@ -68,6 +71,8 @@ export default function DownloadCardPage() {
                 backgroundColor: theme === "dark" ? "#111827" : "#f9fafb",
                 quality: 1,
                 pixelRatio: 3,
+                width: CARD_SIZES.large.width,
+                height: CARD_SIZES.large.height,
             });
 
             // Create download links with personalized filenames
@@ -111,23 +116,44 @@ export default function DownloadCardPage() {
                 Preview both sides below, then download your card ready for
                 print or digital use.
             </p>
-            <div className="flex flex-col md:flex-row gap-6 items-center mx-auto justify-center">
-                <div ref={cardFrontRef}>
+            <div className="flex flex-col xl:flex-row gap-6 items-center mx-auto justify-center">
+                {/* 👀 Visible preview (responsive) */}
+                <div>
                     <BusinessCardFront
                         profile={profile}
                         theme={theme}
                         showEdit
                     />
                 </div>
-                <div ref={cardBackRef}>
+                <div>
                     <CardBack
                         qrImage={qrImage}
                         profile={profile}
                         theme={theme}
                     />
                 </div>
+
+                {/* 🎯 Hidden download-only versions (always large) */}
+                <div className="hidden">
+                    <div ref={cardFrontRef}>
+                        <BusinessCardFront
+                            profile={profile}
+                            theme={theme}
+                            size="large"
+                        />
+                    </div>
+                    <div ref={cardBackRef}>
+                        <CardBack
+                            qrImage={qrImage}
+                            profile={profile}
+                            theme={theme}
+                            size="large"
+                        />
+                    </div>
+                </div>
             </div>
-            <div className="mt-6 flex gap-3 justify-center">
+
+            <div className="mt-6 flex gap-3 justify-center text-sm md:text-lg">
                 <Button
                     onClick={() =>
                         setTheme(theme === "dark" ? "light" : "dark")

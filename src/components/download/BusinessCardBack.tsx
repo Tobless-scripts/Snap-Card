@@ -10,7 +10,7 @@ export default function CardBack({
     qrImage,
     profile,
     theme = "light",
-    size: propSize,
+    size: forceSize,
 }: {
     qrImage: string;
     profile: ProfileData;
@@ -20,14 +20,16 @@ export default function CardBack({
     const [size, setSize] = useState<CardSize>("small");
 
     useEffect(() => {
-        if (propSize) {
-            setSize(propSize);
+        if (forceSize) {
+            setSize(forceSize);
             return;
         }
 
         const updateSize = () => {
             const width = window.innerWidth;
-            if (width < 640) {
+            if (width < 359) {
+                setSize("extraSmall");
+            } else if (width < 640) {
                 setSize("small");
             } else if (width < 1024) {
                 setSize("medium");
@@ -36,10 +38,10 @@ export default function CardBack({
             }
         };
 
-        updateSize(); // initial call
+        updateSize();
         window.addEventListener("resize", updateSize);
         return () => window.removeEventListener("resize", updateSize);
-    }, [propSize]);
+    }, [forceSize]);
 
     const config = CARD_SIZES[size];
 
@@ -51,7 +53,7 @@ export default function CardBack({
                     ? "bg-gray-900 text-white border-gray-700"
                     : "bg-white text-gray-900 border-gray-200",
                 "w-full max-w-full",
-                "sm:max-w-[300px] md:max-w-[450px] lg:max-w-[600px]"
+                "sm:max-w-[570px] md:max-w-[590px] lg:max-w-[610px]"
             )}
             style={{
                 width: config.width,
@@ -99,7 +101,7 @@ export default function CardBack({
                     theme === "dark" ? "text-gray-300" : "text-gray-500"
                 )}
             >
-                {profile.company}
+                {profile.role}
             </p>
         </div>
     );

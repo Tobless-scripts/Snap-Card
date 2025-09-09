@@ -1,8 +1,34 @@
 export const CARD_SIZES = {
+    extraSmall: {
+        width: 260,
+        height: 320,
+        avatar: 25,
+        qrSize: 80,
+        text: {
+            name: "text-sm",
+            meta: "text-xs",
+            contact: "text-xs",
+            label: "text-[7px]",
+        },
+        padding: {
+            card: "p-3",
+            section: "px-3 py-1",
+        },
+        spacing: {
+            gap: "gap-1",
+            socials: "gap-1 mt-1",
+        },
+        icons: {
+            main: 12,
+            social: 14,
+            socialPadding: "p-1",
+        },
+    },
+
     small: {
-        width: 300,
-        height: 187,
-        avatar: 40,
+        width: 358,
+        height: 250,
+        avatar: 70,
         qrSize: 100,
         text: {
             name: "text-sm",
@@ -25,10 +51,10 @@ export const CARD_SIZES = {
         },
     },
     medium: {
-        width: 450,
-        height: 280,
-        avatar: 56,
-        qrSize: 140,
+        width: 680,
+        height: 300,
+        avatar: 85,
+        qrSize: 150,
         text: {
             name: "text-base",
             meta: "text-sm",
@@ -50,9 +76,9 @@ export const CARD_SIZES = {
         },
     },
     large: {
-        width: 600,
-        height: 375,
-        avatar: 72,
+        width: 650,
+        height: 370,
+        avatar: 94,
         qrSize: 180,
         text: {
             name: "text-lg",

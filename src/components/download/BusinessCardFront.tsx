@@ -30,7 +30,7 @@ function extractUsername(link?: string) {
 
 export default function BusinessCardFront({
     profile,
-    size: propSize,
+    size: forceSize,
     theme = "light",
     showEdit = false,
 }: {
@@ -42,16 +42,18 @@ export default function BusinessCardFront({
     const [size, setSize] = useState<CardSize>("small");
 
     useEffect(() => {
-        if (propSize) {
-            setSize(propSize);
+        if (forceSize) {
+            setSize(forceSize);
             return;
         }
 
         const updateSize = () => {
             const width = window.innerWidth;
-            if (width < 640) {
+            if (width < 359) {
+                setSize("extraSmall");
+            } else if (width < 640) {
                 setSize("small");
-            } else if (width < 1024) {
+            } else if (width < 768) {
                 setSize("medium");
             } else {
                 setSize("large");
@@ -61,7 +63,7 @@ export default function BusinessCardFront({
         updateSize();
         window.addEventListener("resize", updateSize);
         return () => window.removeEventListener("resize", updateSize);
-    }, [propSize]);
+    }, [forceSize]);
 
     const config = CARD_SIZES[size];
 
@@ -73,7 +75,7 @@ export default function BusinessCardFront({
                     ? "bg-gradient-to-br from-[#101624] to-[#192335] text-white border-[#232f49]"
                     : "bg-gradient-to-br from-[#f7faff] to-[#eaeef6] text-gray-900 border-[#e1e6ef]",
                 "w-full max-w-full",
-                "sm:max-w-[300px] md:max-w-[450px] lg:max-w-[600px]"
+                "sm:max-w-[570px] md:max-w-[590px] lg:max-w-[610px]"
             )}
             style={{
                 width: config.width,
@@ -95,7 +97,7 @@ export default function BusinessCardFront({
                         width={config.avatar}
                         height={config.avatar}
                         className={clsx(
-                            "rounded-xl object-top border-4",
+                            "rounded-xl object-cover object-top w-full border-4",
                             theme === "dark"
                                 ? "border-[#232f49]"
                                 : "border-[#e1e6ef]"
@@ -110,7 +112,10 @@ export default function BusinessCardFront({
                 </div>
                 <div className="flex-1 ml-3 min-w-0 overflow-hidden">
                     <div
-                        className={clsx("font-bold truncate", config.text.name)}
+                        className={clsx(
+                            "font-bold truncate text-sm md:text-base",
+                            config.text.name
+                        )}
                     >
                         {profile.displayName}
                     </div>
@@ -124,14 +129,16 @@ export default function BusinessCardFront({
                             size={config.icons.main - 4}
                             className="inline-block mr-1 flex-shrink-0"
                         />
-                        <span className="truncate">{profile.role}</span>
+                        <span className="truncate text-xs md:text-md">
+                            {profile.role}
+                        </span>
                         {profile.company && (
                             <span
                                 className={clsx(
                                     theme === "dark"
                                         ? "text-blue-400"
                                         : "text-blue-600",
-                                    "ml-1 truncate"
+                                    "ml-1 truncate text-xs md:text-md"
                                 )}
                             >
                                 at {profile.company}
@@ -141,9 +148,7 @@ export default function BusinessCardFront({
                 </div>
                 {showEdit && (
                     <button
-                        className={clsx(
-                            "ml-auto rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center cursor-pointer hover:bg-black/20 dark:hover:bg-white/20"
-                        )}
+                        className="ml-auto rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center cursor-pointer hover:bg-black/20 dark:hover:bg-white/20"
                         style={{
                             width: config.avatar * 0.5,
                             height: config.avatar * 0.5,
@@ -160,7 +165,7 @@ export default function BusinessCardFront({
                 className={clsx(
                     "flex-1 flex flex-col",
                     config.spacing.gap,
-                    "px-4 mt-1"
+                    "px-4 mt-5"
                 )}
             >
                 {profile.email && (
@@ -245,7 +250,7 @@ export default function BusinessCardFront({
                 profile.links?.instagram ||
                 profile.links?.tiktok) && (
                 <div
-                    className={clsx("px-4", size === "small" ? "pb-1" : "pb-2")}
+                    className={clsx("px-4", size === "small" ? "pb-5" : "pb-2")}
                 >
                     <div
                         className={clsx(
@@ -276,7 +281,7 @@ export default function BusinessCardFront({
                                     theme === "dark"
                                         ? "bg-gray-800 text-white hover:bg-gray-700"
                                         : "bg-gray-100 text-gray-800 hover:bg-gray-200",
-                                    size === "small" ? "text-[10px]" : "text-xs"
+                                    size === "small" ? "text-[7px]" : "text-xs"
                                 )}
                             >
                                 <Linkedin
@@ -302,7 +307,7 @@ export default function BusinessCardFront({
                                     theme === "dark"
                                         ? "bg-gray-800 text-white hover:bg-gray-700"
                                         : "bg-gray-100 text-gray-800 hover:bg-gray-200",
-                                    size === "small" ? "text-[10px]" : "text-xs"
+                                    size === "small" ? "text-[7px]" : "text-xs"
                                 )}
                             >
                                 <Twitter
@@ -328,7 +333,7 @@ export default function BusinessCardFront({
                                     theme === "dark"
                                         ? "bg-gray-800 text-white hover:bg-gray-700"
                                         : "bg-gray-100 text-gray-800 hover:bg-gray-200",
-                                    size === "small" ? "text-[10px]" : "text-xs"
+                                    size === "small" ? "text-[7px]" : "text-xs"
                                 )}
                             >
                                 <Instagram
@@ -354,7 +359,7 @@ export default function BusinessCardFront({
                                     theme === "dark"
                                         ? "bg-gray-800 text-white hover:bg-gray-700"
                                         : "bg-gray-100 text-gray-800 hover:bg-gray-200",
-                                    size === "small" ? "text-[10px]" : "text-xs"
+                                    size === "small" ? "text-[7px]" : "text-xs"
                                 )}
                             >
                                 <Music
